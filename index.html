@@ -1,18 +1,23 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Excel Generator Bot</title>
+    <title>Axis Neo BulkUpload</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen">
     <div class="bg-white p-8 rounded shadow-md w-full max-w-md">
-        <h2 class="text-2xl font-bold mb-6 text-center">Excel Generator Bot</h2>
+        <h2 class="text-2xl font-bold mb-6 text-center">Axis Neo BulkUpload</h2>
 
         <!-- Display the generated file name here -->
         <div id="generatedFileName" class="text-sm text-green-600 mb-4 text-center hidden">
             File Generated: <span id="fileName"></span>
+        </div>
+
+        <!-- Display the number of beneficiaries added -->
+        <div id="beneficiariesCount" class="text-sm text-blue-600 mb-4 text-center">
+            Beneficiaries Added: 0
         </div>
 
         <form id="userForm" class="space-y-4">
@@ -32,7 +37,7 @@
                     </div>
                     <div>
                         <label for="mobileNumber" class="block text-sm font-medium text-gray-700">Mobile Number</label>
-                        <input type="text" id="mobileNumber1" name="mobileNumber1" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
+                        <input type="text" id="mobileNumber1" name="mobileNumber1" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" readonly>
                     </div>
                     <div>
                         <label for="accountNumber" class="block text-sm font-medium text-gray-700">Beneficiary Account Number</label>
@@ -54,12 +59,31 @@
 
     <script>
         let userCount = 1; // To keep track of the number of user forms
+        let beneficiariesAdded = 0; // Count of beneficiaries added
+
+        // Function to generate a random 10-digit Indian mobile number
+        function generateMobileNumber() {
+            const prefix = Math.floor(Math.random() * 3) + 7; // Generates 7, 8, or 9
+            const suffix = Math.floor(Math.random() * 1000000000); // Generates the remaining 9 digits
+            return `${prefix}${suffix.toString().padStart(9, '0')}`;
+        }
+
+        // Function to update the count of beneficiaries added
+        function updateBeneficiariesCount() {
+            document.getElementById('beneficiariesCount').textContent = `Beneficiary Number: ${beneficiariesAdded}`;
+        }
+
+        // Set the first user's mobile number and increment the count
+        document.getElementById('mobileNumber1').value = generateMobileNumber();
+        beneficiariesAdded++;
+        updateBeneficiariesCount();
 
         // Function to add new user input fields
         document.getElementById('addUser').addEventListener('click', function() {
             // Hide previous user form if any
             document.getElementById(`userCard${userCount}`).style.display = 'none';
             userCount++;
+            beneficiariesAdded++;
 
             const newUserCard = document.createElement('div');
             newUserCard.classList.add('user-card');
@@ -80,7 +104,7 @@
                 </div>
                 <div>
                     <label for="mobileNumber" class="block text-sm font-medium text-gray-700">Mobile Number</label>
-                    <input type="text" id="mobileNumber${userCount}" name="mobileNumber${userCount}" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
+                    <input type="text" id="mobileNumber${userCount}" name="mobileNumber${userCount}" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" readonly value="${generateMobileNumber()}">
                 </div>
                 <div>
                     <label for="accountNumber" class="block text-sm font-medium text-gray-700">Beneficiary Account Number</label>
@@ -93,6 +117,9 @@
             `;
 
             document.getElementById('inputSection').appendChild(newUserCard);
+
+            // Update the beneficiaries count
+            updateBeneficiariesCount();
         });
 
         // Function to handle the form submission and generate Excel
