@@ -10,19 +10,16 @@
     <div class="bg-white p-8 rounded shadow-md w-full max-w-md">
         <h2 class="text-2xl font-bold mb-6 text-center">Axis Neo BulkUpload</h2>
 
-        <!-- Display the generated file name here -->
         <div id="generatedFileName" class="text-sm text-green-600 mb-4 text-center hidden">
             File Generated: <span id="fileName"></span>
         </div>
 
-        <!-- Display the number of beneficiaries added -->
         <div id="beneficiariesCount" class="text-sm text-blue-600 mb-4 text-center">
             Beneficiaries Added: 0
         </div>
 
         <form id="userForm" class="space-y-4">
             <div id="inputSection">
-                <!-- Dynamic user input fields will appear here -->
                 <div id="userCard1" class="user-card">
                     <div>
                         <label for="contactType" class="block text-sm font-medium text-gray-700">Contact Type</label>
@@ -32,8 +29,8 @@
                         </select>
                     </div>
                     <div>
-                        <label for="businessName" class="block text-sm font-medium text-gray-700">Business Name</label>
-                        <input type="text" id="businessName1" name="businessName1" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
+                        <label for="beneficiaryName" class="block text-sm font-medium text-gray-700">Contact/Beneficiary Name</label>
+                        <input type="text" id="beneficiaryName1" name="beneficiaryName1" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
                     </div>
                     <div>
                         <label for="mobileNumber" class="block text-sm font-medium text-gray-700">Mobile Number</label>
@@ -58,29 +55,24 @@
     </div>
 
     <script>
-        let userCount = 1; // To keep track of the number of user forms
-        let beneficiariesAdded = 0; // Count of beneficiaries added
+        let userCount = 1;
+        let beneficiariesAdded = 0;
 
-        // Function to generate a random 10-digit Indian mobile number
         function generateMobileNumber() {
-            const prefix = Math.floor(Math.random() * 3) + 7; // Generates 7, 8, or 9
-            const suffix = Math.floor(Math.random() * 1000000000); // Generates the remaining 9 digits
+            const prefix = Math.floor(Math.random() * 3) + 7;
+            const suffix = Math.floor(Math.random() * 1000000000);
             return `${prefix}${suffix.toString().padStart(9, '0')}`;
         }
 
-        // Function to update the count of beneficiaries added
         function updateBeneficiariesCount() {
-            document.getElementById('beneficiariesCount').textContent = `Beneficiary Number: ${beneficiariesAdded}`;
+            document.getElementById('beneficiariesCount').textContent = `Beneficiaries Added: ${beneficiariesAdded}`;
         }
 
-        // Set the first user's mobile number and increment the count
         document.getElementById('mobileNumber1').value = generateMobileNumber();
         beneficiariesAdded++;
         updateBeneficiariesCount();
 
-        // Function to add new user input fields
         document.getElementById('addUser').addEventListener('click', function() {
-            // Hide previous user form if any
             document.getElementById(`userCard${userCount}`).style.display = 'none';
             userCount++;
             beneficiariesAdded++;
@@ -89,7 +81,6 @@
             newUserCard.classList.add('user-card');
             newUserCard.id = `userCard${userCount}`;
 
-            // Create the new input fields (same as initial form)
             newUserCard.innerHTML = `
                 <div>
                     <label for="contactType" class="block text-sm font-medium text-gray-700">Contact Type</label>
@@ -99,8 +90,8 @@
                     </select>
                 </div>
                 <div>
-                    <label for="businessName" class="block text-sm font-medium text-gray-700">Business Name</label>
-                    <input type="text" id="businessName${userCount}" name="businessName${userCount}" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
+                    <label for="beneficiaryName" class="block text-sm font-medium text-gray-700">Contact/Beneficiary Name</label>
+                    <input type="text" id="beneficiaryName${userCount}" name="beneficiaryName${userCount}" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
                 </div>
                 <div>
                     <label for="mobileNumber" class="block text-sm font-medium text-gray-700">Mobile Number</label>
@@ -117,43 +108,32 @@
             `;
 
             document.getElementById('inputSection').appendChild(newUserCard);
-
-            // Update the beneficiaries count
             updateBeneficiariesCount();
         });
 
-        // Function to handle the form submission and generate Excel
         document.getElementById('userForm').addEventListener('submit', function(event) {
             event.preventDefault();
             
             const data = [
-                ["Contact Type", "Business Name", "Contact Person Name", "Mobile Number", "E-Mail ID", "Billing Name", "Billing Address", "Billing Code Pincode", "Shipping Name", "Shipping Address", "Shipping Code Pincode", "Beneficiary Account Number", "IFSC Code", "Bank Name", "Branch Name", "PAN", "GSTIN", "GST Registration Type", "Is e-Commerce Operator?", "Is Transporter?", "Transporter ID", "TDS", "Notes"]
+                ["Contact Type", "Contact/Beneficiary Name", "Mobile Number", "E-Mail ID", "Billing Name", "Billing Address", "Billing Code Pincode", "Shipping Name", "Shipping Address", "Shipping Code Pincode", "Beneficiary Account Number", "IFSC Code", "PAN", "GSTIN", "GST Registration Type", "Is e-Commerce Operator?", "Is Transporter?", "Transporter ID", "TDS", "Notes"]
             ];
 
-            // Collect data from all user entries
             for (let i = 1; i <= userCount; i++) {
                 const contactType = document.getElementById(`contactType${i}`).value;
-                const businessName = document.getElementById(`businessName${i}`).value.trim();
+                const beneficiaryName = document.getElementById(`beneficiaryName${i}`).value.trim();
                 const mobileNumber = document.getElementById(`mobileNumber${i}`).value;
                 const accountNumber = document.getElementById(`accountNumber${i}`).value;
                 const ifsc = document.getElementById(`ifsc${i}`).value;
 
-                // Push the user data to the array
-                data.push([contactType, businessName, businessName, mobileNumber, "", businessName, "", "", "", "", "", accountNumber, ifsc, "", "", "", "", "", "", "", "", "", ""]);
+                data.push([contactType, beneficiaryName, mobileNumber, "", beneficiaryName, "", "", "", "", "", accountNumber, ifsc, "", "", "", "", "", "", "", ""]);
             }
 
-            // Generate a random file name
             const randomFileName = `Excel_${Math.random().toString(36).substr(2, 8)}.xlsx`;
-
-            // Generate Excel sheet with collected data
             const ws = XLSX.utils.aoa_to_sheet(data);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
-
-            // Download the Excel file
             XLSX.writeFile(wb, randomFileName);
 
-            // Show the generated file name message
             document.getElementById('fileName').textContent = randomFileName;
             document.getElementById('generatedFileName').classList.remove('hidden');
         });
