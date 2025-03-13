@@ -1,62 +1,59 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Axis Neo BulkUpload</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Axis Neo Bulk Upload</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen">
-    <div class="bg-white p-8 rounded shadow-md w-full max-w-md">
-        <h2 class="text-2xl font-bold mb-6 text-center">Axis Neo BulkUpload</h2>
-
-        <div id="generatedFileName" class="text-sm text-green-600 mb-4 text-center hidden">
-            File Generated: <span id="fileName"></span>
-        </div>
+    <div class="bg-white p-6 rounded-lg shadow-md w-full max-w-lg">
+        <h2 class="text-2xl font-bold mb-4 text-center">Axis Neo Bulk Upload</h2>
 
         <div id="beneficiariesCount" class="text-sm text-blue-600 mb-4 text-center">
             Beneficiaries Added: 0
         </div>
 
-        <form id="userForm" class="space-y-4">
+        <form id="userForm">
             <div id="inputSection">
-                <div id="userCard1" class="user-card">
+                <div id="userCard" class="space-y-3">
                     <div>
-                        <label for="contactType" class="block text-sm font-medium text-gray-700">Contact Type</label>
-                        <select id="contactType1" name="contactType1" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
+                        <label class="block text-gray-700">Contact Type</label>
+                        <select id="contactType" class="w-full p-2 border rounded">
                             <option value="Vendor">Vendor</option>
                             <option value="Customer">Customer</option>
                         </select>
                     </div>
                     <div>
-                        <label for="beneficiaryName" class="block text-sm font-medium text-gray-700">Contact/Beneficiary Name</label>
-                        <input type="text" id="beneficiaryName1" name="beneficiaryName1" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
+                        <label class="block text-gray-700">Business Name</label>
+                        <input type="text" id="businessName" class="w-full p-2 border rounded" required>
                     </div>
                     <div>
-                        <label for="mobileNumber" class="block text-sm font-medium text-gray-700">Mobile Number</label>
-                        <input type="text" id="mobileNumber1" name="mobileNumber1" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" readonly>
+                        <label class="block text-gray-700">Mobile Number</label>
+                        <input type="text" id="mobileNumber" class="w-full p-2 border rounded bg-gray-100" readonly>
                     </div>
                     <div>
-                        <label for="accountNumber" class="block text-sm font-medium text-gray-700">Beneficiary Account Number</label>
-                        <input type="text" id="accountNumber1" name="accountNumber1" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                        <label class="block text-gray-700">Beneficiary Account Number</label>
+                        <input type="text" id="accountNumber" class="w-full p-2 border rounded">
                     </div>
                     <div>
-                        <label for="ifsc" class="block text-sm font-medium text-gray-700">IFSC Code</label>
-                        <input type="text" id="ifsc1" name="ifsc1" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                        <label class="block text-gray-700">IFSC Code</label>
+                        <input type="text" id="ifsc" class="w-full p-2 border rounded">
                     </div>
                 </div>
             </div>
-            
-            <div class="flex justify-between items-center">
-                <button type="button" id="addUser" class="bg-blue-500 text-white p-2 rounded-md">Add New User</button>
-                <button type="submit" class="bg-green-500 text-white p-2 rounded-md">Generate Excel</button>
+
+            <div class="flex justify-between items-center mt-4">
+                <button type="button" id="addUser" class="bg-blue-500 text-white px-4 py-2 rounded-md">Add New User</button>
+                <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded-md">Generate Excel</button>
             </div>
         </form>
     </div>
 
     <script>
-        let userCount = 1;
         let beneficiariesAdded = 0;
+        let userList = [];
 
         function generateMobileNumber() {
             const prefix = Math.floor(Math.random() * 3) + 7;
@@ -68,74 +65,92 @@
             document.getElementById('beneficiariesCount').textContent = `Beneficiaries Added: ${beneficiariesAdded}`;
         }
 
-        document.getElementById('mobileNumber1').value = generateMobileNumber();
+        document.getElementById('mobileNumber').value = generateMobileNumber();
         beneficiariesAdded++;
         updateBeneficiariesCount();
 
-        document.getElementById('addUser').addEventListener('click', function() {
-            document.getElementById(`userCard${userCount}`).style.display = 'none';
-            userCount++;
-            beneficiariesAdded++;
+        document.getElementById('addUser').addEventListener('click', function () {
+            const contactType = document.getElementById('contactType').value;
+            const businessName = document.getElementById('businessName').value.trim();
+            const mobileNumber = document.getElementById('mobileNumber').value;
+            const accountNumber = document.getElementById('accountNumber').value;
+            const ifsc = document.getElementById('ifsc').value;
+
+            if (businessName.length < 3) {
+                alert("Business Name must be at least 3 characters long.");
+                return;
+            }
+
+            userList.push([
+                contactType, businessName, businessName, mobileNumber, "", businessName, "", "", "", "", "", accountNumber, ifsc, "", "", "", "", "", "", "", ""
+            ]);
+
+            document.getElementById('userCard').style.display = 'none';
 
             const newUserCard = document.createElement('div');
-            newUserCard.classList.add('user-card');
-            newUserCard.id = `userCard${userCount}`;
-
+            newUserCard.id = 'userCard';
+            newUserCard.className = "space-y-3";
             newUserCard.innerHTML = `
                 <div>
-                    <label for="contactType" class="block text-sm font-medium text-gray-700">Contact Type</label>
-                    <select id="contactType${userCount}" name="contactType${userCount}" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
+                    <label class="block text-gray-700">Contact Type</label>
+                    <select id="contactType" class="w-full p-2 border rounded">
                         <option value="Vendor">Vendor</option>
                         <option value="Customer">Customer</option>
                     </select>
                 </div>
                 <div>
-                    <label for="beneficiaryName" class="block text-sm font-medium text-gray-700">Contact/Beneficiary Name</label>
-                    <input type="text" id="beneficiaryName${userCount}" name="beneficiaryName${userCount}" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required>
+                    <label class="block text-gray-700">Business Name</label>
+                    <input type="text" id="businessName" class="w-full p-2 border rounded" required>
                 </div>
                 <div>
-                    <label for="mobileNumber" class="block text-sm font-medium text-gray-700">Mobile Number</label>
-                    <input type="text" id="mobileNumber${userCount}" name="mobileNumber${userCount}" class="mt-1 block w-full p-2 border border-gray-300 rounded-md" readonly value="${generateMobileNumber()}">
+                    <label class="block text-gray-700">Mobile Number</label>
+                    <input type="text" id="mobileNumber" class="w-full p-2 border rounded bg-gray-100" readonly value="${generateMobileNumber()}">
                 </div>
                 <div>
-                    <label for="accountNumber" class="block text-sm font-medium text-gray-700">Beneficiary Account Number</label>
-                    <input type="text" id="accountNumber${userCount}" name="accountNumber${userCount}" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                    <label class="block text-gray-700">Beneficiary Account Number</label>
+                    <input type="text" id="accountNumber" class="w-full p-2 border rounded">
                 </div>
                 <div>
-                    <label for="ifsc" class="block text-sm font-medium text-gray-700">IFSC Code</label>
-                    <input type="text" id="ifsc${userCount}" name="ifsc${userCount}" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                    <label class="block text-gray-700">IFSC Code</label>
+                    <input type="text" id="ifsc" class="w-full p-2 border rounded">
                 </div>
             `;
 
+            document.getElementById('inputSection').innerHTML = "";
             document.getElementById('inputSection').appendChild(newUserCard);
+
+            beneficiariesAdded++;
             updateBeneficiariesCount();
         });
 
-        document.getElementById('userForm').addEventListener('submit', function(event) {
+        document.getElementById('userForm').addEventListener('submit', function (event) {
             event.preventDefault();
-            
-            const data = [
-                ["Contact Type", "Contact/Beneficiary Name", "Mobile Number", "E-Mail ID", "Billing Name", "Billing Address", "Billing Code Pincode", "Shipping Name", "Shipping Address", "Shipping Code Pincode", "Beneficiary Account Number", "IFSC Code", "PAN", "GSTIN", "GST Registration Type", "Is e-Commerce Operator?", "Is Transporter?", "Transporter ID", "TDS", "Notes"]
-            ];
 
-            for (let i = 1; i <= userCount; i++) {
-                const contactType = document.getElementById(`contactType${i}`).value;
-                const beneficiaryName = document.getElementById(`beneficiaryName${i}`).value.trim();
-                const mobileNumber = document.getElementById(`mobileNumber${i}`).value;
-                const accountNumber = document.getElementById(`accountNumber${i}`).value;
-                const ifsc = document.getElementById(`ifsc${i}`).value;
+            const contactType = document.getElementById('contactType').value;
+            const businessName = document.getElementById('businessName').value.trim();
+            const mobileNumber = document.getElementById('mobileNumber').value;
+            const accountNumber = document.getElementById('accountNumber').value;
+            const ifsc = document.getElementById('ifsc').value;
 
-                data.push([contactType, beneficiaryName, mobileNumber, "", beneficiaryName, "", "", "", "", "", accountNumber, ifsc, "", "", "", "", "", "", "", ""]);
+            if (businessName.length < 3) {
+                alert("Business Name must be at least 3 characters long.");
+                return;
             }
+
+            userList.push([
+                contactType, businessName, businessName, mobileNumber, "", businessName, "", "", "", "", "", accountNumber, ifsc, "", "", "", "", "", "", "", ""
+            ]);
+
+            const data = [
+                ["Contact Type", "Business Name", "Contact/Beneficiary Name", "Mobile Number", "E-Mail ID", "Billing Name", "Billing Address", "Billing Code Pincode", "Shipping Name", "Shipping Address", "Shipping Code Pincode", "Beneficiary Account Number", "IFSC Code", "PAN", "GSTIN", "GST Registration Type", "Is e-Commerce Operator?", "Is Transporter?", "Transporter ID", "TDS", "Notes"],
+                ...userList
+            ];
 
             const randomFileName = `Excel_${Math.random().toString(36).substr(2, 8)}.xlsx`;
             const ws = XLSX.utils.aoa_to_sheet(data);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
             XLSX.writeFile(wb, randomFileName);
-
-            document.getElementById('fileName').textContent = randomFileName;
-            document.getElementById('generatedFileName').classList.remove('hidden');
         });
     </script>
 </body>
